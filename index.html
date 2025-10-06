@@ -1,54 +1,77 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>購入者専用アプリ</title>
+  <title>購入者専用アプリ（修正版）</title>
   <style>
-    body { font-family: sans-serif; text-align: center; margin-top: 50px; background-color: #fdf6f0; }
-    #app { display: none; padding: 20px; border: 2px solid #f3a683; border-radius: 15px; background-color: #fff3e0; max-width: 400px; margin: auto; }
-    button { padding: 10px 20px; font-size: 16px; margin-top: 20px; border: none; border-radius: 8px; background-color: #f7d794; cursor: pointer; }
-    button:hover { background-color: #f6b93b; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      background-color: #fdf6f0;
+    }
+    #app {
+      display: none;
+      padding: 20px;
+      border: 2px solid #f3a683;
+      border-radius: 15px;
+      background-color: #fff3e0;
+      max-width: 400px;
+      margin: auto;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #f7d794;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #f6b93b;
+    }
     h1 { color: #e55039; }
     p { color: #6a4c93; }
   </style>
-  <script>
-    // 🔒 パスワード保護
-    let password = prompt("パスワードを入力してください：");
-    if(password === "notion123"){ // ←ここを購入者用パスワードに変更
-      document.addEventListener("DOMContentLoaded", function(){
-        document.getElementById("app").style.display = "block";
-      });
-    } else {
-      alert("パスワードが違います。アクセスできません。");
-      document.body.innerHTML = "<h2>パスワードが違います</h2>";
-    }
-
-```
-// 🔹 背景色を変える機能
-function changeColor(){
-  const colors = ["#f7d794","#f6b93b","#f19066","#786fa6","#63cdda"];
-  document.getElementById("app").style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
-}
-
-// 🔹 メッセージ表示機能
-function showMessage(){
-  const messages = [
-    "ご購入ありがとうございます😊",
-    "今日もハッピーに過ごしましょう！"
-  ];
-  alert(messages[Math.floor(Math.random()*messages.length)]);
-}
-```
-
-  </script>
 </head>
 <body>
   <div id="app">
     <h1>購入者専用アプリ</h1>
-    <p>ここで簡単な機能を試せます。</p>
-    <button onclick="changeColor()">背景色を変える</button>
-    <button onclick="showMessage()">メッセージを表示</button>
+    <p>この中で簡単な機能を試せます。</p>
+    <button id="colorBtn">背景色を変える</button>
+    <button id="msgBtn">メッセージを表示</button>
   </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // パスワード確認
+      const password = prompt("パスワードを入力してください:");
+      if (password === "notion123") { // ←お好きなパスワードに変更OK
+        document.getElementById("app").style.display = "block";
+      } else {
+        alert("パスワードが違います。アクセスできません。");
+        document.body.innerHTML = "<h2>パスワードが違います</h2>";
+        return;
+      }
+
+      // 背景色変更ボタン
+      document.getElementById("colorBtn").addEventListener("click", function() {
+        const colors = ["#f7d794", "#f6b93b", "#f19066", "#786fa6", "#63cdda"];
+        document.getElementById("app").style.backgroundColor =
+          colors[Math.floor(Math.random() * colors.length)];
+      });
+
+      // メッセージ表示ボタン
+      document.getElementById("msgBtn").addEventListener("click", function() {
+        const messages = [
+          "こんにちは！購入ありがとうございます😊",
+          "今日もハッピーに過ごそう！",
+          "Canva.AIで作ったサンプルだよ！"
+        ];
+        alert(messages[Math.floor(Math.random() * messages.length)]);
+      });
+    });
+  </script>
 </body>
 </html>
