@@ -1,0 +1,992 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="ja"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="utf-8" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;My Daily Routine — Timeline (4:00–0:00)&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>:root{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--bg: #F6F3EF; <span class="Apple-converted-space">          </span>/* 温かいベージュ */</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--panel: #FFFFFFF2;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--ink: #2B2B2B;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--muted: #7A7A7A;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--line: #E7E2DC;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--accent: #C9B8A4; <span class="Apple-converted-space">      </span>/* ベージュのアクセント */</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--accent-2:#B6C7BF;<span class="Apple-converted-space">      </span>/* グリーン寄りの中間色 */</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--shadow: 0 10px 30px rgba(0,0,0,.06);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>html,body{height:100%}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.soft-scroll::-webkit-scrollbar{height:10px;width:10px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.soft-scroll::-webkit-scrollbar-thumb{background:#D9D4CE;border-radius:8px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.soft-scroll::-webkit-scrollbar-track{background:transparent}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* タイムライン */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.timeline-canvas { position: relative; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.task-block {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>left: 0; right: auto;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid var(--line);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box-shadow: 0 6px 18px rgba(0,0,0,.05);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>transition: transform .15s ease, box-shadow .15s ease, background-color .2s ease, width .15s ease, left .15s ease, height .1s ease;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>backdrop-filter: blur(2px);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background-clip: padding-box;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.task-block:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,.08); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.task-block.overlap { /* 重なり時の控えめな強調 */</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box-shadow: 0 8px 20px rgba(0,0,0,.07);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-color: #D8D2CB;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* 3列以上の時は情報量を少しコンパクトに */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.task-block.tight .inner { padding: 6px 8px !important; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.task-block.tight .title { font-size: 12px !important; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.task-block.tight .meta<span class="Apple-converted-space">  </span>{ font-size: 10px !important; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.hour-line { position: absolute; left: 0; right: 0; height: 1px; background: var(--line); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.hour-label { position: absolute; left: -64px; width: 56px; text-align: right; color: var(--muted); font-size: 12px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.drag-ghost { opacity: .5; transform: scale(.98); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.bevel { background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.3)); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn { border: 1px solid var(--line); background: #FFFFFF; transition: background-color .15s ease, color .15s ease, transform .05s ease; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn:active { transform: translateY(1px); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.tab-active { background: #FFFFFF; color: #3C3C3C; border-color: #DCD6CF; box-shadow: inset 0 0 0 1px #EDE7E0; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.tab-idle { background: #EFEAE3; color: #6E6B67; border-color: #E4DDD5; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; border: 1px solid rgba(0,0,0,.08)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.modal-backdrop { background: rgba(0,0,0,.28) }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.input { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; background: #FCFAF8 }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.input:focus { outline: none; box-shadow: 0 0 0 3px rgba(201,184,164,.25) }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* 所要時間調整用のドラッグハンドル */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.resize-handle{ position:absolute; left:8px; right:8px; height:10px; border-radius:6px; cursor:ns-resize; opacity:0; transition:opacity .15s ease; background: linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.10)); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.task-block:hover .resize-handle{ opacity:1; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.resize-handle.top{ top:2px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.resize-handle.bottom{ bottom:2px; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="min-h-screen bg-[color:var(--bg)] text-[color:var(--ink)] antialiased"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="max-w-6xl mx-auto px-4 sm:px-6 py-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- ヘッダー --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;header class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h1 class="text-2xl sm:text-3xl font-semibold tracking-tight"&gt;My Daily Routine&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p class="text-sm text-[color:var(--muted)] mt-1"&gt;縦の時間軸 4:00 → 0:00／1分刻み・ドラッグで移動/伸縮・時間編集・繰り返し設定・重なり自動レイアウト&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="weekdayTab" class="btn px-4 py-2 rounded-xl tab-active"&gt;平日&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="weekendTab" class="btn px-4 py-2 rounded-xl tab-idle"&gt;週末&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="calendarTab" class="btn px-4 py-2 rounded-xl tab-idle"&gt;カレンダー&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="addTaskBtn" class="btn px-4 py-2 rounded-xl bg-[color:var(--accent)] text-white hover:opacity-90"&gt;予定を追加&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/header&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- メイン --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="grid grid-cols-1 lg:grid-cols-3 gap-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;!-- タイムライン --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;section id="timelineSection" class="lg:col-span-2 rounded-2xl p-4 sm:p-6 bg-[color:var(--panel)] shadow-[var(--shadow)] overflow-hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="flex items-center justify-between pb-4 border-b border-[color:var(--line)]"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="flex items-center gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="w-2.5 h-2.5 rounded-full bg-[color:var(--accent)]"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-lg font-medium"&gt;今日の流れ（タイムライン）&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="text-xs text-[color:var(--muted)]"&gt;開始 4:00 / 終了 0:00&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="timelineWrapper" class="relative mt-2 soft-scroll overflow-auto" style="height: 70vh;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="relative" id="timelineCanvas" style="margin-left: 72px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- JSが描画 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/section&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;!-- カレンダー --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;section id="calendarSection" class="hidden lg:col-span-3 rounded-2xl p-4 sm:p-6 bg-[color:var(--panel)] shadow-[var(--shadow)]"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="flex items-center justify-between pb-4 border-b border-[color:var(--line)]"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="flex items-center gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="w-2.5 h-2.5 rounded-full bg-[color:var(--accent)]"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-lg font-medium"&gt;週間カレンダー&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button id="prevWeek" class="btn px-3 py-1 rounded-lg text-sm"&gt;← 前週&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;span id="weekRange" class="text-sm text-[color:var(--muted)] px-3"&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button id="nextWeek" class="btn px-3 py-1 rounded-lg text-sm"&gt;次週 →&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="calendarGrid" class="mt-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;!-- JSが描画 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/section&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;!-- リスト --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;aside id="taskListSection" class="rounded-2xl p-4 sm:p-6 bg-[color:var(--panel)] shadow-[var(--shadow)]"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="flex items-center justify-between pb-4 border-b border-[color:var(--line)]"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="flex items-center gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="w-2.5 h-2.5 rounded-full bg-[color:var(--accent-2)]"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-lg font-medium"&gt;予定リスト（ドラッグして並び替え）&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button id="sortByTimeBtn" class="text-xs underline text-[color:var(--muted)] hover:text-[color:var(--ink)]"&gt;時間順に並べる&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;ul id="taskList" class="mt-3 space-y-3 soft-scroll overflow-auto" style="max-height: 58vh;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;!-- JSが描画 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/ul&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="mt-4 text-xs text-[color:var(--muted)]"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>ヒント：右リストはダブルクリックで編集。タイムラインはドラッグで移動、上下のバーで所要時間を伸縮。1分刻みで吸着し、重なりは横に整列して見やすく表示します。</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/aside&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- モーダル --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="taskModal" class="hidden fixed inset-0 z-50 flex items-center justify-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="absolute inset-0 modal-backdrop"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="relative bg-white rounded-2xl w-[min(680px,94vw)] p-5 sm:p-6 shadow-2xl"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="flex items-center justify-between mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h3 id="modalTitle" class="text-lg font-semibold"&gt;予定を編集&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="closeModal" class="text-[color:var(--muted)] hover:text-[color:var(--ink)]"&gt;✕&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;form id="taskForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;label class="text-sm block mb-1"&gt;タイトル&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;input type="text" id="titleInput" class="input" placeholder="例）朝ごはんの準備" required /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;label class="text-sm block mb-1"&gt;カテゴリ&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;select id="categoryInput" class="input"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;料理&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;洗濯&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;掃除&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;買い物&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;育児&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;送迎&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;仕事&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;自分時間&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;運動&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;休憩&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;睡眠&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;食事&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;入浴&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;散歩&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option&gt;洗い物&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;label class="text-sm block mb-1"&gt;開始時間&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;input type="time" id="startInput" class="input" min="04:00" max="23:59" step="60" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;label class="text-sm block mb-1"&gt;終了時間&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;input type="time" id="endInput" class="input" min="04:01" max="23:59" step="60" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="sm:col-span-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;label class="text-sm block mb-1"&gt;繰り返し&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="grid grid-cols-2 sm:grid-cols-4 gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label class="flex items-center gap-2 btn px-3 py-2 rounded-xl cursor-pointer"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="radio" name="repeat" value="none" checked /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span&gt;なし&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label class="flex items-center gap-2 btn px-3 py-2 rounded-xl cursor-pointer"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="radio" name="repeat" value="weekday" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span&gt;平日のみ&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label class="flex items-center gap-2 btn px-3 py-2 rounded-xl cursor-pointer"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="radio" name="repeat" value="weekend" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span&gt;週末のみ&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label class="flex items-center gap-2 btn px-3 py-2 rounded-xl cursor-pointer"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="radio" name="repeat" value="everyday" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span&gt;毎日&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p class="text-xs text-[color:var(--muted)] mt-2"&gt;毎日＝平日と週末の両方に反映します。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="sm:col-span-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;label class="text-sm block mb-1"&gt;リマインダー&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="grid grid-cols-2 sm:grid-cols-4 gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label class="flex items-center gap-2 btn px-3 py-2 rounded-xl cursor-pointer"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="radio" name="reminder" value="none" checked /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span&gt;なし&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label class="flex items-center gap-2 btn px-3 py-2 rounded-xl cursor-pointer"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="radio" name="reminder" value="5" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span&gt;5分前&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label class="flex items-center gap-2 btn px-3 py-2 rounded-xl cursor-pointer"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="radio" name="reminder" value="15" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span&gt;15分前&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label class="flex items-center gap-2 btn px-3 py-2 rounded-xl cursor-pointer"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="radio" name="reminder" value="30" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span&gt;30分前&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p class="text-xs text-[color:var(--muted)] mt-2"&gt;ブラウザ通知でお知らせします。通知許可が必要です。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="sm:col-span-2 flex items-center justify-between mt-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button type="button" id="deleteBtn" class="btn px-3 py-2 rounded-xl text-red-600"&gt;削除&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button type="button" id="duplicateBtn" class="btn px-3 py-2 rounded-xl"&gt;複製&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button type="submit" class="px-4 py-2 rounded-xl text-white" style="background:#A99680"&gt;保存&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/form&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 時間レンジとスケール</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const START_MIN = 4*60;<span class="Apple-converted-space">    </span>// 4:00</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const END_MIN = 24*60; <span class="Apple-converted-space">    </span>// 0:00（24:00扱い）</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const MINUTE_PX = 0.9; <span class="Apple-converted-space">    </span>// 1分あたりの高さ(px)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const SLOT_MIN = 1;<span class="Apple-converted-space">        </span>// 1分刻み</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// カラー（ミニマル）</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const COLOR_MAP = {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"料理": <span class="Apple-converted-space">  </span>{ bg:"#F6EFE8", edge:"#E8DACC", dot:"#D7BFA3" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"洗濯": <span class="Apple-converted-space">  </span>{ bg:"#EDF3F1", edge:"#D6E5E0", dot:"#AFC9BF" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"掃除": <span class="Apple-converted-space">  </span>{ bg:"#F2F2ED", edge:"#E3E2D8", dot:"#C9C7B8" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"買い物": { bg:"#F6F1EE", edge:"#E7DDD6", dot:"#D3B8A7" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"育児": <span class="Apple-converted-space">  </span>{ bg:"#F2EEF7", edge:"#E1DBEC", dot:"#C7BEE0" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"送迎": <span class="Apple-converted-space">  </span>{ bg:"#EEF6FA", edge:"#DBEAF2", dot:"#B7D1E0" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"仕事": <span class="Apple-converted-space">  </span>{ bg:"#EFEFF7", edge:"#DEDEED", dot:"#B9B9D6" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"自分時間": { bg:"#FBF7F1", edge:"#EFE5D9", dot:"#D9C5A8" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"運動": <span class="Apple-converted-space">  </span>{ bg:"#F1F8F1", edge:"#D7E8D7", dot:"#A8D0A8" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"休憩": <span class="Apple-converted-space">  </span>{ bg:"#FBF8F5", edge:"#EFE7E0", dot:"#D9CFC5" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"睡眠": <span class="Apple-converted-space">  </span>{ bg:"#F0F2F5", edge:"#E0E4EA", dot:"#BAC4D1" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"食事": <span class="Apple-converted-space">  </span>{ bg:"#FFF6F0", edge:"#F2E1D6", dot:"#E3BEA6" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"入浴": <span class="Apple-converted-space">  </span>{ bg:"#F5F2F8", edge:"#E6DFEE", dot:"#CFC3E0" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"散歩": <span class="Apple-converted-space">  </span>{ bg:"#F5F7F2", edge:"#E3E8DA", dot:"#C6D2B5" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"洗い物": { bg:"#F4F6FA", edge:"#E0E6F0", dot:"#C1CEE3" },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>"default":{ bg:"#F7F5F2", edge:"#E6E1DA", dot:"#C9B8A4" }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ストレージ</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const store = {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>load() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>try { const raw = localStorage.getItem("routine_v1"); return raw? JSON.parse(raw): null; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>catch { return null; }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>},</p>
+<p class="p1"><span class="Apple-converted-space">      </span>save(state) { localStorage.setItem("routine_v1", JSON.stringify(state)); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 初期データ</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const initial = {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>view: "weekday",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>weekday: [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("睡眠","睡眠","22:30","04:00"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("朝食づくり","料理","06:00","07:00"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("子どもの送り","送迎","07:30","08:00"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("掃除","掃除","09:00","10:00"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("買い物","買い物","10:30","11:30"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("昼食","食事","12:00","12:30"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("洗濯","洗濯","13:00","13:45"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("仕事（在宅）","仕事","14:00","16:00"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("子どもの迎え","送迎","16:30","17:00"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("夕食づくり","料理","17:00","18:30"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("自分時間","自分時間","21:00","22:00"),</p>
+<p class="p1"><span class="Apple-converted-space">      </span>],</p>
+<p class="p1"><span class="Apple-converted-space">      </span>weekend: [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("睡眠","睡眠","23:00","07:00"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("朝食・ゆっくり","食事","08:00","09:00"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("家族で買い物","買い物","10:00","11:30"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("運動","運動","15:00","15:45"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("夕食づくり","料理","17:30","18:30"),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>task("休憩","休憩","21:00","22:00"),</p>
+<p class="p1"><span class="Apple-converted-space">      </span>]</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function timeToMin(t){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const [h,m] = String(t||"").split(":").map(Number);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (Number.isNaN(h) || Number.isNaN(m)) return START_MIN;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (h===0) return 24*60 + m; // 0:00は24:00扱い</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return h*60 + m;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function clampToRange(mins){ return Math.max(START_MIN, Math.min(END_MIN, mins)); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function minToTime(mins){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (mins &gt;= 24*60) return "00:00";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const h = Math.floor(mins/60), m = mins%60;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function uid(){ return Math.random().toString(36).slice(2,9) }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function task(title, category, start, end){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const s = clampToRange(timeToMin(start));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let e = clampToRange(timeToMin(end));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (e &lt;= s) e = s + 30; // 追加直後の最低30分はそのまま（必要なら変えられます）</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return { id: uid(), title, category, start: s, end: e, repeat: "none", reminder: "none" };</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function escapeHtml(str){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return String(str).replace(/[&amp;&lt;&gt;"']/g, s=&gt;({ "&amp;":"&amp;amp;","&lt;":"&amp;lt;","&gt;":"&amp;gt;","\"":"&amp;quot;","'":"&amp;#39;" }[s]));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function shade(hex, amount=-6){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const m = hex.match(/^#([0-9a-f]{6})$/i);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(!m) return hex;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const num = parseInt(m[1],16);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let r=(num&gt;&gt;16)&amp;255, g=(num&gt;&gt;8)&amp;255, b=num&amp;255;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const adj = (v)=&gt; Math.max(0, Math.min(255, Math.round(v*(100+amount)/100)));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>r=adj(r); g=adj(g); b=adj(b);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return '#'+((1&lt;&lt;24)+(r&lt;&lt;16)+(g&lt;&lt;8)+b).toString(16).slice(1).toUpperCase();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 状態</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let state = store.load() ?? initial;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let currentWeekStart = getWeekStart(new Date());</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 要素</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const weekdayTab = document.getElementById("weekdayTab");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const weekendTab = document.getElementById("weekendTab");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const calendarTab = document.getElementById("calendarTab");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const addTaskBtn = document.getElementById("addTaskBtn");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const sortByTimeBtn = document.getElementById("sortByTimeBtn");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const taskList = document.getElementById("taskList");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const timelineCanvas = document.getElementById("timelineCanvas");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const timelineWrapper = document.getElementById("timelineWrapper");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const timelineSection = document.getElementById("timelineSection");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const calendarSection = document.getElementById("calendarSection");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const taskListSection = document.getElementById("taskListSection");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const calendarGrid = document.getElementById("calendarGrid");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const weekRange = document.getElementById("weekRange");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const prevWeek = document.getElementById("prevWeek");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const nextWeek = document.getElementById("nextWeek");</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// モーダル</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const taskModal = document.getElementById("taskModal");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const taskForm = document.getElementById("taskForm");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const modalTitle = document.getElementById("modalTitle");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const titleInput = document.getElementById("titleInput");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const categoryInput = document.getElementById("categoryInput");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const startInput = document.getElementById("startInput");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const endInput = document.getElementById("endInput");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const deleteBtn = document.getElementById("deleteBtn");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const duplicateBtn = document.getElementById("duplicateBtn");</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>let editingId = null;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ビュー切替</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function setView(v){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>state.view = v;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>weekdayTab.classList.toggle("tab-active", v==="weekday");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>weekendTab.classList.toggle("tab-active", v==="weekend");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>calendarTab.classList.toggle("tab-active", v==="calendar");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>weekdayTab.classList.toggle("tab-idle", v!=="weekday");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>weekendTab.classList.toggle("tab-idle", v!=="weekend");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>calendarTab.classList.toggle("tab-idle", v!=="calendar");</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (v === "calendar") {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>timelineSection.classList.add("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>taskListSection.classList.add("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>calendarSection.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>renderCalendar();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>timelineSection.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>taskListSection.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>calendarSection.classList.add("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>renderAll();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>store.save(state);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>scheduleAllReminders();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>weekdayTab.addEventListener("click", ()=&gt; setView("weekday"));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>weekendTab.addEventListener("click", ()=&gt; setView("weekend"));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>calendarTab.addEventListener("click", ()=&gt; setView("calendar"));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// データアクセス</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function getTasks(){ return state[state.view]; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function setTasks(arr){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>state[state.view] = arr;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>store.save(state);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>renderAll();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>scheduleAllReminders();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// タイムライン描画</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function renderTimeline(){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tasks = getTasks();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const totalMin = END_MIN - START_MIN;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const canvasHeight = totalMin * MINUTE_PX;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>timelineCanvas.style.height = canvasHeight + "px";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>timelineCanvas.innerHTML = "";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 時刻線/ラベル</p>
+<p class="p1"><span class="Apple-converted-space">      </span>for (let h=4; h&lt;=24; h++){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const y = (h*60 - START_MIN) * MINUTE_PX;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const line = document.createElement("div");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>line.className = "hour-line";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>line.style.top = y + "px";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>line.style.opacity = (h%2===0)? 1 : .55;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>timelineCanvas.appendChild(line);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const label = document.createElement("div");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>label.className = "hour-label";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let hh = (h===24)? "00" : String(h).padStart(2,"0");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>label.textContent = `${hh}:00`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>label.style.top = (y-7) + "px";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>timelineCanvas.appendChild(label);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 重なり検出 → 列割り当て</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const ordered = tasks.map(t=&gt;({...t})).sort((a,b)=&gt; a.start-b.start || a.end-b.end);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const groups = [];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>for (const t of ordered){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let placed = false;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>for (const g of groups){</p>
+<p class="p1"><span class="Apple-converted-space">          </span>if (g.some(x=&gt; !(t.end &lt;= x.start || t.start &gt;= x.end))){ g.push(t); placed = true; break; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (!placed) groups.push([t]);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const layoutInfo = new Map();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>for (const g of groups){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const cols = [];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const assigns = [];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>g.sort((a,b)=&gt; a.start-b.start || a.end-b.end);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>for (const item of g){</p>
+<p class="p1"><span class="Apple-converted-space">          </span>let colIndex = 0;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>for (; colIndex&lt;cols.length; colIndex++){</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (item.start &gt;= cols[colIndex]) break;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>if (colIndex===cols.length) cols.push(item.end);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>else cols[colIndex] = item.end;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>assigns.push({ id: item.id, colIndex });</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const colCount = cols.length;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>for (const asg of assigns){</p>
+<p class="p1"><span class="Apple-converted-space">          </span>layoutInfo.set(asg.id, { colIndex: asg.colIndex, colCount });</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// タスクブロック</p>
+<p class="p1"><span class="Apple-converted-space">      </span>tasks.forEach(t=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const layout = layoutInfo.get(t.id) || { colIndex:0, colCount:1 };</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const col = COLOR_MAP[t.category] ?? COLOR_MAP.default;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const top = (t.start - START_MIN) * MINUTE_PX;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const height = Math.max(24, (t.end - t.start) * MINUTE_PX);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const el = document.createElement("div");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.className = "task-block";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.style.top = top + "px";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.style.height = height + "px";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.style.background = `linear-gradient(180deg, ${col.bg}, #FFFFFF)`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.style.borderColor = col.edge;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.dataset.id = t.id;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 列レイアウト</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const gap = 8;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const totalWidth = timelineCanvas.clientWidth;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const width = Math.max(88, Math.floor((totalWidth - (layout.colCount - 1) * gap) / layout.colCount));</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const left = (width + gap) * layout.colIndex;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.style.width = width + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.style.left = left + 'px';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (layout.colCount &gt; 1){</p>
+<p class="p1"><span class="Apple-converted-space">          </span>el.classList.add('overlap');</p>
+<p class="p1"><span class="Apple-converted-space">          </span>el.style.background = `linear-gradient(180deg, ${shade(col.bg, -6)}, #FFFFFF)`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (layout.colCount &gt;= 3){</p>
+<p class="p1"><span class="Apple-converted-space">          </span>el.classList.add('tight');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="inner flex items-center justify-between px-3 py-2 cursor-grab"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="flex items-center gap-2 min-w-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="dot" style="background:${col.dot}"&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div class="truncate"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="title text-[13px] font-medium truncate"&gt;${escapeHtml(t.title)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="meta text-[11px] text-[color:var(--muted)] truncate"&gt;${t.category} ・ ${minToTime(t.start)}〜${minToTime(t.end)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="text-xs px-2 py-1 rounded-lg bevel" style="border:1px solid ${col.edge}; background:#FFFFFFAA"&gt;編集&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="resize-handle top"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="resize-handle bottom"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// ダブルクリック即編集</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.addEventListener("dblclick", ()=&gt; openModal(t.id));</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// クリック（ボタン含む）も編集</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.addEventListener("click", (e)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>if (e.target.tagName.toLowerCase()==="button") { openModal(t.id); return; }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>openModal(t.id);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// ドラッグ（移動/伸縮）→ 1分スナップ</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.addEventListener("mousedown", (e)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>if (e.target.tagName.toLowerCase()==="button") return;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const isTop = e.target.classList.contains('resize-handle') &amp;&amp; e.target.classList.contains('top');</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const isBottom = e.target.classList.contains('resize-handle') &amp;&amp; e.target.classList.contains('bottom');</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const mode = isTop ? 'resize-top' : isBottom ? 'resize-bottom' : 'move';</p>
+<p class="p1"><span class="Apple-converted-space">          </span>e.preventDefault();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>const startY = e.clientY;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const initialStart = t.start;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const initialEnd = t.end;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>document.body.style.userSelect = "none";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>const onMove = (ev)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const dy = ev.clientY - startY;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const deltaMin = Math.round(dy / MINUTE_PX / SLOT_MIN) * SLOT_MIN;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let newStart = initialStart, newEnd = initialEnd;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (mode==='move'){ newStart = clampToRange(initialStart + deltaMin); newEnd = clampToRange(initialEnd + deltaMin); }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (mode==='resize-top'){ newStart = clampToRange(initialStart + deltaMin); if (newStart &gt; newEnd - SLOT_MIN) newStart = newEnd - SLOT_MIN; }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (mode==='resize-bottom'){ newEnd = clampToRange(initialEnd + deltaMin); if (newEnd &lt; newStart + SLOT_MIN) newEnd = newStart + SLOT_MIN; }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>el.style.top = (newStart - START_MIN) * MINUTE_PX + "px";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>el.style.height = Math.max(24, (newEnd - newStart) * MINUTE_PX) + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>el.querySelector('.meta').textContent = `${t.category} ・ ${minToTime(newStart)}〜${minToTime(newEnd)}`;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>};</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const onUp = (ev)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const dy = ev.clientY - startY;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const deltaMin = Math.round(dy / MINUTE_PX / SLOT_MIN) * SLOT_MIN;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let newStart = initialStart, newEnd = initialEnd;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (mode==='move'){ newStart = clampToRange(initialStart + deltaMin); newEnd = clampToRange(initialEnd + deltaMin); }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (mode==='resize-top'){ newStart = clampToRange(initialStart + deltaMin); if (newStart &gt; newEnd - SLOT_MIN) newStart = newEnd - SLOT_MIN; }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (mode==='resize-bottom'){ newEnd = clampToRange(initialEnd + deltaMin); if (newEnd &lt; newStart + SLOT_MIN) newEnd = newStart + SLOT_MIN; }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const updated = getTasks().map(x=&gt; x.id===t.id ? { ...x, start:newStart, end:newEnd } : x);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setTasks(updated);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.removeEventListener("mousemove", onMove);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.removeEventListener("mouseup", onUp);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.body.style.userSelect = "";</p>
+<p class="p1"><span class="Apple-converted-space">          </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>document.addEventListener("mousemove", onMove);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>document.addEventListener("mouseup", onUp);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>timelineCanvas.appendChild(el);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// リスト描画（D&amp;D＋ダブルクリック編集）</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let dragId = null;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function renderList(){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tasks = getTasks();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>taskList.innerHTML = "";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>tasks.forEach((t)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const col = COLOR_MAP[t.category] ?? COLOR_MAP.default;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const li = document.createElement("li");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.draggable = true;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.className = "rounded-xl border flex items-center justify-between gap-3 p-3 bg-white hover:bg-[#FAF8F6] transition";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.style.borderColor = col.edge;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.dataset.id = t.id;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="flex items-center gap-3 min-w-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;span class="cursor-grab select-none text-[color:var(--muted)]"&gt;⠿&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="min-w-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div class="text-sm font-medium truncate"&gt;${escapeHtml(t.title)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div class="text-xs text-[color:var(--muted)] truncate"&gt;${t.category} ・ ${minToTime(t.start)}〜${minToTime(t.end)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="flex items-center gap-2 shrink-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;span class="badge" style="background:${(COLOR_MAP[t.category]||COLOR_MAP.default).bg}"&gt;${t.category}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="btn px-2 py-1 rounded-lg text-xs" data-action="edit"&gt;編集&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.addEventListener("dragstart", (e)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>dragId = t.id;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>li.classList.add("drag-ghost");</p>
+<p class="p1"><span class="Apple-converted-space">          </span>e.dataTransfer.effectAllowed = "move";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.addEventListener("dragend", ()=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>dragId = null;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>li.classList.remove("drag-ghost");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.addEventListener("dragover", (e)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">          </span>e.dataTransfer.dropEffect = "move";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.addEventListener("drop", (e)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const arr = getTasks();</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const from = arr.findIndex(x=&gt;x.id===dragId);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const to = arr.findIndex(x=&gt;x.id===t.id);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>if (from&lt;0 || to&lt;0 || from===to) return;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const updated = [...arr];</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const [moved] = updated.splice(from,1);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>updated.splice(to,0,moved);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>setTasks(updated);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.querySelector("[data-action='edit']").addEventListener("click", ()=&gt; openModal(t.id));</p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.addEventListener("dblclick", ()=&gt; openModal(t.id));</p>
+<p class="p1"><span class="Apple-converted-space">        </span>li.addEventListener("click", (e)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>if (e.target.closest("button")) return;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>openModal(t.id);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>taskList.appendChild(li);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// モーダル開閉</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function openModal(id){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>editingId = id;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tasks = getTasks();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const t = tasks.find(x=&gt;x.id===id) || { id:null, title:"", category:"料理", start: START_MIN, end: START_MIN+60, repeat:"none", reminder:"none" };</p>
+<p class="p1"><span class="Apple-converted-space">      </span>modalTitle.textContent = t.id ? "予定を編集" : "予定を追加";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>titleInput.value = t.title || "";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>categoryInput.value = t.category || "料理";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>startInput.value = minToTime(t.start);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>endInput.value = minToTime(t.end);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const r = (t.repeat||"none");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const target = taskForm.querySelector(`input[name="repeat"][value="${r}"]`);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (target) target.checked = true;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const rem = (t.reminder||"none");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const reminderTarget = taskForm.querySelector(`input[name="reminder"][value="${rem}"]`);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (reminderTarget) reminderTarget.checked = true;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>deleteBtn.style.visibility = t.id ? "visible" : "hidden";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>duplicateBtn.style.visibility = t.id ? "visible" : "hidden";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>taskModal.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function closeModal(){ taskModal.classList.add("hidden"); editingId = null; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById("closeModal").addEventListener("click", closeModal);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById("taskModal").addEventListener("click", (e)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(e.target.id==="taskModal") closeModal();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 追加</p>
+<p class="p1"><span class="Apple-converted-space">    </span>addTaskBtn.addEventListener("click", ()=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>editingId = null;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>modalTitle.textContent = "予定を追加";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>titleInput.value = "";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>categoryInput.value = "料理";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>startInput.value = "06:00";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>endInput.value = "07:00";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>taskForm.querySelector(`input[name="repeat"][value="none"]`).checked = true;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>deleteBtn.style.visibility = "hidden";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>duplicateBtn.style.visibility = "hidden";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>taskModal.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 保存</p>
+<p class="p1"><span class="Apple-converted-space">    </span>taskForm.addEventListener("submit", (e)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const title = titleInput.value.trim() || "（無題）";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const category = categoryInput.value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let s = clampToRange(timeToMin(startInput.value || "06:00"));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let en = clampToRange(timeToMin(endInput.value || "07:00"));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (en &lt;= s) en = s + 1; // 最低1分に変更</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const repeat = taskForm.querySelector("input[name='repeat']:checked").value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const reminder = taskForm.querySelector("input[name='reminder']:checked").value;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!editingId){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const newTask = { id: uid(), title, category, start: s, end: en, repeat, reminder };</p>
+<p class="p1"><span class="Apple-converted-space">        </span>applyRepeatCreate(newTask);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>applyRepeatUpdate(editingId, { title, category, start: s, end: en, repeat, reminder });</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>closeModal();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 削除</p>
+<p class="p1"><span class="Apple-converted-space">    </span>deleteBtn.addEventListener("click", ()=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!editingId) return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const ok = confirm("この予定を削除しますか？");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!ok) return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tasks = getTasks().filter(t=&gt;t.id!==editingId);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setTasks(tasks);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>closeModal();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 複製</p>
+<p class="p1"><span class="Apple-converted-space">    </span>duplicateBtn.addEventListener("click", ()=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!editingId) return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tasks = getTasks();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const base = tasks.find(t=&gt;t.id===editingId);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!base) return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const copy = { ...base, id: uid(), title: base.title + "（複製）" };</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setTasks([...tasks, copy]);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 時間順ソート</p>
+<p class="p1"><span class="Apple-converted-space">    </span>sortByTimeBtn.addEventListener("click", ()=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tasks = [...getTasks()].sort((a,b)=&gt; a.start - b.start || a.end - b.end);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setTasks(tasks);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 繰り返し適用</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function applyRepeatCreate(taskObj){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (taskObj.repeat==="everyday"){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>state.weekday = [...state.weekday, { ...taskObj }];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>state.weekend = [...state.weekend, { ...taskObj, id: uid() }];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else if (taskObj.repeat==="weekday"){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>state.weekday = [...state.weekday, { ...taskObj }];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else if (taskObj.repeat==="weekend"){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>state.weekend = [...state.weekend, { ...taskObj }];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>state[state.view] = [...state[state.view], { ...taskObj }];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>store.save(state);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>renderAll();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>scheduleAllReminders();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function applyRepeatUpdate(targetId, patch){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tasks = getTasks().map(t=&gt; t.id===targetId ? { ...t, ...patch } : t);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setTasks(tasks);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 初回レンダリング</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function renderAll(){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>renderTimeline();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>renderList();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const firstStart = getTasks().reduce((min, t)=&gt; Math.min(min, t.start), END_MIN);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const y = (firstStart - START_MIN)*MINUTE_PX - 80;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>timelineWrapper.scrollTo({ top: Math.max(0,y), behavior: "smooth" });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// リマインダー通知システム</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let reminderTimeouts = new Map();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 通知許可の確認と要求</p>
+<p class="p1"><span class="Apple-converted-space">    </span>async function requestNotificationPermission() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!('Notification' in window)) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>console.log('このブラウザは通知をサポートしていません');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return false;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (Notification.permission === 'granted') {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return true;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (Notification.permission === 'default') {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const permission = await Notification.requestPermission();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return permission === 'granted';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>return false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function scheduleReminder(task) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!task.reminder || task.reminder === 'none') return;</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const reminderMinutes = parseInt(task.reminder);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const now = new Date();</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 今日の予定時刻を計算</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const today = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let taskTime = new Date(today);</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (task.start &gt;= 24*60) { // 翌日0:00以降（24:00扱い）</p>
+<p class="p1"><span class="Apple-converted-space">        </span>taskTime.setDate(taskTime.getDate() + 1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>taskTime.setHours(0, task.start - 24*60, 0, 0);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>taskTime.setHours(Math.floor(task.start/60), task.start%60, 0, 0);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const reminderTime = new Date(taskTime.getTime() - reminderMinutes * 60 * 1000);</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 既存のタイマーをクリア</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (reminderTimeouts.has(task.id)) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>clearTimeout(reminderTimeouts.get(task.id));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// デバッグ情報</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.log(`タスク: ${task.title}`);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.log(`開始時刻: ${minToTime(task.start)} (${task.start}分)`);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.log(`現在時刻: ${now.toLocaleTimeString()}`);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.log(`予定時刻: ${taskTime.toLocaleTimeString()}`);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.log(`通知時刻: ${reminderTime.toLocaleTimeString()}`);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.log(`${reminderMinutes}分前通知まで: ${Math.round((reminderTime.getTime() - now.getTime()) / 1000)}秒`);</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 通知時刻が未来の場合のみスケジュール</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (reminderTime &gt; now) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const delay = reminderTime.getTime() - now.getTime();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>console.log(`リマインダーを${Math.round(delay/1000)}秒後に設定: ${task.title}`);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const timeoutId = setTimeout(async () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const hasPermission = await requestNotificationPermission();</p>
+<p class="p1"><span class="Apple-converted-space">          </span>if (hasPermission) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">              </span>const notification = new Notification(`🔔 ${task.title}`, {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>body: `${reminderMinutes}分後に開始予定です\n${minToTime(task.start)}〜${minToTime(task.end)} | ${task.category}`,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyUzYuNDggMjIgMTIgMjJTMjIgMTcuNTIgMjIgMTJTMTcuNTIgMiAxMiAyWk0xMyAxN0gxMVY5SDEzVjE3Wk0xMyA3SDExVjVIMTNWN1oiIGZpbGw9IiNDOUI4QTQiLz4KPHN2Zz4K',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>tag: task.id,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>requireInteraction: false</p>
+<p class="p1"><span class="Apple-converted-space">              </span>});</p>
+<p class="p2"><span class="Apple-converted-space">              </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>// 5秒後に自動で閉じる</p>
+<p class="p1"><span class="Apple-converted-space">              </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>notification.close();</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}, 5000);</p>
+<p class="p2"><span class="Apple-converted-space">              </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>console.log(`通知を表示しました: ${task.title}`);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (error) {</p>
+<p class="p1"><span class="Apple-converted-space">              </span>console.error('通知の表示に失敗:', error);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>console.log('通知許可がありません');</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>reminderTimeouts.delete(task.id);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}, delay);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>reminderTimeouts.set(task.id, timeoutId);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>console.log(`通知時刻が過去のためスキップ: ${task.title}`);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function scheduleAllReminders() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.log('全リマインダーを再設定中...');</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 既存のタイマーをクリア</p>
+<p class="p1"><span class="Apple-converted-space">      </span>reminderTimeouts.forEach(timeoutId =&gt; clearTimeout(timeoutId));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>reminderTimeouts.clear();</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 現在のビューのタスクのリマインダーをスケジュール</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tasks = getTasks();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tasksWithReminders = tasks.filter(t =&gt; t.reminder &amp;&amp; t.reminder !== 'none');</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.log(`${tasksWithReminders.length}個のリマインダー付きタスクを処理中...`);</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>tasksWithReminders.forEach(task =&gt; scheduleReminder(task));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// カレンダー関連の関数</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function getWeekStart(date) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const d = new Date(date);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const day = d.getDay();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 月曜日を週の開始とする</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return new Date(d.setDate(diff));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function formatDate(date) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return `${date.getMonth() + 1}/${date.getDate()}`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function getDayName(dayIndex) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const days = ['月', '火', '水', '木', '金', '土', '日'];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return days[dayIndex];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function isWeekday(dayIndex) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return dayIndex &gt;= 0 &amp;&amp; dayIndex &lt;= 4; // 月〜金</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function renderCalendar() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const weekStart = new Date(currentWeekStart);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const weekEnd = new Date(weekStart);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>weekEnd.setDate(weekEnd.getDate() + 6);</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>weekRange.textContent = `${formatDate(weekStart)} - ${formatDate(weekEnd)}`;</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// カレンダーグリッドを作成</p>
+<p class="p1"><span class="Apple-converted-space">      </span>calendarGrid.innerHTML = '';</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// ヘッダー（曜日）</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const headerRow = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>headerRow.className = 'grid grid-cols-8 gap-2 mb-4';</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 時間列のヘッダー</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const timeHeader = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>timeHeader.className = 'text-xs text-[color:var(--muted)] text-center py-2';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>timeHeader.textContent = '時間';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>headerRow.appendChild(timeHeader);</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 曜日ヘッダー</p>
+<p class="p1"><span class="Apple-converted-space">      </span>for (let i = 0; i &lt; 7; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const dayHeader = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>dayHeader.className = 'text-sm font-medium text-center py-2 rounded-lg';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const date = new Date(weekStart);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>date.setDate(date.getDate() + i);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>dayHeader.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div&gt;${getDayName(i)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="text-xs text-[color:var(--muted)]"&gt;${formatDate(date)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (i &gt;= 5) { // 土日</p>
+<p class="p1"><span class="Apple-converted-space">          </span>dayHeader.style.background = '#F8F6F3';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>headerRow.appendChild(dayHeader);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>calendarGrid.appendChild(headerRow);</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 時間スロット（6:00-23:00）</p>
+<p class="p1"><span class="Apple-converted-space">      </span>for (let hour = 6; hour &lt;= 23; hour++) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const row = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>row.className = 'grid grid-cols-8 gap-2 mb-2';</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 時間ラベル</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const timeLabel = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>timeLabel.className = 'text-xs text-[color:var(--muted)] text-right py-1 pr-2';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>timeLabel.textContent = `${String(hour).padStart(2, '0')}:00`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>row.appendChild(timeLabel);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 各曜日のセル</p>
+<p class="p1"><span class="Apple-converted-space">        </span>for (let day = 0; day &lt; 7; day++) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const cell = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">          </span>cell.className = 'min-h-[40px] border border-[color:var(--line)] rounded-lg p-1 relative';</p>
+<p class="p1"><span class="Apple-converted-space">          </span>cell.style.background = day &gt;= 5 ? '#FEFDFB' : '#FFFFFF';</p>
+<p class="p2"><span class="Apple-converted-space">          </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>// この時間帯のタスクを取得</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const dayTasks = isWeekday(day) ? state.weekday : state.weekend;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const hourStart = hour * 60;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const hourEnd = (hour + 1) * 60;</p>
+<p class="p2"><span class="Apple-converted-space">          </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>const tasksInHour = dayTasks.filter(task =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return task.start &lt; hourEnd &amp;&amp; task.end &gt; hourStart;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>});</p>
+<p class="p2"><span class="Apple-converted-space">          </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>// タスクを表示</p>
+<p class="p1"><span class="Apple-converted-space">          </span>tasksInHour.forEach(task =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const taskEl = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const col = COLOR_MAP[task.category] ?? COLOR_MAP.default;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>taskEl.className = 'text-xs p-1 mb-1 rounded cursor-pointer truncate';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>taskEl.style.background = col.bg;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>taskEl.style.borderLeft = `3px solid ${col.dot}`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>taskEl.textContent = task.title;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>taskEl.title = `${task.title}\n${minToTime(task.start)}〜${minToTime(task.end)}\n${task.category}`;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>taskEl.addEventListener('click', () =&gt; openModal(task.id));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cell.appendChild(taskEl);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>});</p>
+<p class="p2"><span class="Apple-converted-space">          </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>row.appendChild(cell);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>calendarGrid.appendChild(row);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 週移動</p>
+<p class="p1"><span class="Apple-converted-space">    </span>prevWeek.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>currentWeekStart.setDate(currentWeekStart.getDate() - 7);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>renderCalendar();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>nextWeek.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>currentWeekStart.setDate(currentWeekStart.getDate() + 7);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>renderCalendar();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 初回通知許可要求</p>
+<p class="p1"><span class="Apple-converted-space">    </span>requestNotificationPermission().then(granted =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (granted) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>console.log('通知許可が得られました');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>console.log('通知許可が得られませんでした。ブラウザ設定で通知を許可してください。');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>setView(state.view || "weekday");</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 初回リマインダー設定</p>
+<p class="p1"><span class="Apple-converted-space">    </span>scheduleAllReminders();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p1">&lt;script&gt;(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a1ce2796f33bf7',t:'MTc1OTcxODU0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&amp;&amp;(document.onreadystatechange=e,c())}}}})();&lt;/script&gt;&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
